@@ -22,9 +22,9 @@ final class ScanModel {
     /// Photos the user is about to delete across all groups.
     var discarded: [PHAsset] { groups.flatMap(\.discarded) }
 
-    func startScan(from start: Date, to end: Date, options: GroupingOptions) {
+    func startScan(from start: Date, to end: Date, options: GroupingOptions, ranking: RankingOptions) {
         scanTask?.cancel()
-        scanTask = Task { await scan(from: start, to: end, options: options) }
+        scanTask = Task { await scan(from: start, to: end, options: options, ranking: ranking) }
     }
 
     func cancelScan() {
@@ -55,7 +55,7 @@ final class ScanModel {
         }
     }
 
-    private func scan(from start: Date, to end: Date, options: GroupingOptions) async {
+    private func scan(from start: Date, to end: Date, options: GroupingOptions, ranking: RankingOptions) async {
         let status = await PhotoLibrary.requestAccess()
         guard status == .authorized || status == .limited else {
             phase = .failed("Photo Picker needs access to your photos. You can allow it in Settings › Privacy & Security › Photos.")
@@ -105,7 +105,7 @@ final class ScanModel {
         phase = .grouping
         let found = analyses.compactMap { $0 }
         groups = await Task.detached {
-            SimilarityGrouper.group(found, options: options).map(PhotoRanker.rank)
+            SimilarityGrouper.group(found, options: options).map { PhotoRanker.rank($0, options: ranking) }
         }.value
         phase = .results
     }

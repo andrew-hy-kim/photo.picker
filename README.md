@@ -11,13 +11,15 @@ Everything runs on the phone with Apple's Vision framework. No photos are upload
 3. **Rank each group.** Scores are relative to the other photos in the same group:
    | Signal | How | Weight |
    |---|---|---|
-   | Sharpness | Variance of the Laplacian (catches motion blur and missed focus) | 35% |
+   | Sharpness | Variance of the Laplacian (catches motion blur and missed focus), measured on the subject (faces, the pet, or whatever Vision thinks draws the eye) so busy backgrounds don't win | 35% |
    | Faces | Vision face capture quality (eyes open, in focus, facing camera), weighted toward the worst face in the shot | 30% (only when people are in the shot) |
+   | Pets | Cat/dog fully in frame (cut-off heads lose points) and both eyes visible | 30% (only when a cat or dog is in the shot) |
    | Composition | Apple's aesthetics score (iOS 18+) | 20% |
    | Exposure | Penalises very dark or bright frames and blown highlights | 15% |
    | Favorite | Photos you already ♥'d get a bonus | +15% |
-4. **Review.** The ★ pick in each group is kept. Tap a thumbnail to keep or discard it, or tap **Compare** to swipe through full-screen with a score breakdown.
-5. **Delete extras.** The discarded photos move to **Recently Deleted**, where you can recover them for 30 days.
+4. **Decide what to keep.** The ★ pick in each group is kept. If the runner-up scores within 5% of it, both are kept and the group is marked *Too close to call*. Exact ties go to the later shot. Optionally, when a group has both portrait and landscape shots, the best of each is kept.
+5. **Review.** Tap a thumbnail to keep or discard it, or tap **Compare** to swipe through full-screen with a score breakdown.
+6. **Delete extras.** The discarded photos move to **Recently Deleted**, where you can recover them for 30 days.
 
 ## Running it on your iPhone
 
@@ -34,6 +36,7 @@ With a free Apple ID the app expires after 7 days; just run it from Xcode again.
 
 - **Similarity slider.** *Strict* only groups near-identical frames. *Loose* also groups the same scene from slightly different angles. If unrelated photos get lumped together, move it toward Strict. If obvious duplicates aren't grouped, move it toward Loose.
 - **Time window.** Photos further apart than this are never grouped.
+- **Keep best portrait and landscape.** Off by default.
 - Weights live in `PhotoPicker/PhotoRanker.swift`.
 
 ## Code map
@@ -41,8 +44,8 @@ With a free Apple ID the app expires after 7 days; just run it from Xcode again.
 | File | What it does |
 |---|---|
 | `PhotoLibrary.swift` | Photos permission, fetching, image loading, deletion |
-| `PhotoAnalyzer.swift` | Per-photo Vision requests, sharpness and exposure |
+| `PhotoAnalyzer.swift` | Per-photo Vision requests (faces, pets, saliency, feature print), subject sharpness and exposure |
 | `SimilarityGrouper.swift` | Clusters near-duplicates by time and feature-print distance |
-| `PhotoRanker.swift` | Scores and orders photos within a group |
+| `PhotoRanker.swift` | Scores and orders photos within a group; close calls, tie-breaks and orientation picks |
 | `ScanModel.swift` | Drives a scan and holds results |
 | `ContentView.swift`, `ResultsView.swift`, `GroupDetailView.swift` | SwiftUI screens |

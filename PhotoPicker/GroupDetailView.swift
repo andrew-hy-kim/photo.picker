@@ -48,6 +48,9 @@ struct GroupDetailView: View {
                 if let faces = photo.breakdown.faces {
                     MetricRow(name: "Faces", value: faces)
                 }
+                if let animals = photo.breakdown.animals {
+                    MetricRow(name: "Pet framing", value: animals)
+                }
                 if let aesthetics = photo.breakdown.aesthetics {
                     MetricRow(name: "Composition", value: aesthetics)
                 }

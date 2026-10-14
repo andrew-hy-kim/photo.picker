@@ -12,6 +12,8 @@ struct PhotoAnalysis {
     let exposure: Double
     /// 0...1 face capture quality (eyes open, in focus, facing camera). nil when no faces.
     let faceQuality: Double?
+    /// 0...1 for the main cat/dog: fully in frame and looking at the camera. nil when no animal.
+    let animalScore: Double?
     /// Apple's aesthetic score (-1...1). nil when unavailable (iOS < 18).
     let aesthetics: Double?
 
@@ -23,6 +25,7 @@ struct ScoreBreakdown {
     var sharpness: Double
     var exposure: Double
     var faces: Double?
+    var animals: Double?
     var aesthetics: Double?
 }
 
@@ -31,7 +34,10 @@ struct ScoredPhoto: Identifiable {
     let asset: PHAsset
     let score: Double
     let breakdown: ScoreBreakdown
-    let reasons: [String]
+    var reasons: [String]
+
+    var date: Date { asset.creationDate ?? .distantPast }
+    var isLandscape: Bool { asset.pixelWidth > asset.pixelHeight }
 }
 
 struct PhotoGroup: Identifiable {
@@ -39,6 +45,8 @@ struct PhotoGroup: Identifiable {
     /// Sorted best-first.
     var photos: [ScoredPhoto]
     var keptIDs: Set<String>
+    /// The top two scored too close to call, so both were kept.
+    let isCloseCall: Bool
 
     var best: ScoredPhoto { photos[0] }
     var date: Date? { photos.compactMap(\.asset.creationDate).min() }

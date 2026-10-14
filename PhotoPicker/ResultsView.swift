@@ -34,7 +34,7 @@ struct ResultsView: View {
     private var list: some View {
         List {
             Section {
-                Text("Found \(model.groups.count) sets of similar photos. The ★ pick is kept; tap any photo to keep or discard it.")
+                Text("Found \(model.groups.count) sets of similar photos. The ★ pick is kept; tap any photo to keep or discard it. When two shots are too close to call, both are kept so you can choose.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -42,6 +42,11 @@ struct ResultsView: View {
                 Section {
                     GroupStrip(group: $group)
                         .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
+                    if group.isCloseCall {
+                        Label("Too close to call — both kept, you pick", systemImage: "equal.circle")
+                            .font(.footnote)
+                            .foregroundStyle(.orange)
+                    }
                 } header: {
                     HStack {
                         if let date = group.date {

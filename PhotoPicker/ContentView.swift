@@ -37,6 +37,7 @@ struct ScanSetupView: View {
     @State private var end = Date.now
     @AppStorage("similarityThreshold") private var threshold = 0.55
     @AppStorage("maxTimeGapMinutes") private var gapMinutes = 5.0
+    @AppStorage("keepBestOfEachOrientation") private var keepBothOrientations = false
 
     var body: some View {
         Form {
@@ -74,11 +75,18 @@ struct ScanSetupView: View {
             }
 
             Section {
+                Toggle("Keep best portrait and landscape", isOn: $keepBothOrientations)
+            } footer: {
+                Text("When you shot the same scene both ways, keep the best of each — e.g. one for Instagram, one for a wallpaper.")
+            }
+
+            Section {
                 Button {
                     model.startScan(
                         from: Calendar.current.startOfDay(for: start),
                         to: Calendar.current.date(byAdding: .day, value: 1, to: Calendar.current.startOfDay(for: end))!,
-                        options: GroupingOptions(maxTimeGap: gapMinutes * 60, similarityThreshold: Float(threshold))
+                        options: GroupingOptions(maxTimeGap: gapMinutes * 60, similarityThreshold: Float(threshold)),
+                        ranking: RankingOptions(keepBestOfEachOrientation: keepBothOrientations)
                     )
                 } label: {
                     Label("Find the best shots", systemImage: "sparkles")
